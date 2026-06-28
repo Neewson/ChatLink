@@ -290,27 +290,7 @@ export const api = {
       const mockUsers = getMockData("users", SEED_USERS) as any;
       let user = (Object.values(mockUsers) as any[]).find((u: any) => u.email.toLowerCase() === payload.email.toLowerCase());
       if (!user) {
-        // Auto-register simulated user for ease of review
-        const username = payload.email.split("@")[0].replace(/[^a-z0-9_]/g, "");
-        user = {
-          id: "user_" + Math.random().toString(36).substring(2, 11),
-          username: username || "nilson",
-          email: payload.email,
-          firstName: "Usuário",
-          lastName: "Demonstração",
-          photoUrl: `https://api.dicebear.com/7.x/adventurer/svg?seed=${username || "nilson"}`,
-          role: "user",
-          status: "online",
-          isBanned: false,
-          twoFactorEnabled: false,
-          bio: "Olá, estou usando o ChatLink!",
-          createdAt: new Date().toISOString(),
-          privacySettings: DEFAULT_PRIVACY,
-          blockedUsers: [],
-          mutedChats: []
-        };
-        mockUsers[user.id] = user;
-        saveMockData("users", mockUsers);
+        throw new Error("E-mail ou senha incorretos.");
       }
       return { token: "token_" + user.id, user, tempToken: "temp_" + user.id };
     }
