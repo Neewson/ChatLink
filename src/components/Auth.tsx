@@ -186,19 +186,23 @@ export default function Auth({ onAuthSuccess }: AuthProps) {
   };
 
   return (
-    <div id="auth-container" className="min-h-screen flex items-center justify-center bg-[#020617] text-slate-100 p-4 font-sans select-none">
-      <div className="w-full max-w-md glass rounded-3xl p-8 border border-slate-800 shadow-2xl relative overflow-hidden">
-        {/* Glow Effects */}
-        <div className="absolute -top-10 -left-10 w-40 h-40 bg-blue-600/15 rounded-full blur-3xl pointer-events-none"></div>
-        <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-emerald-600/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div id="auth-container" className="min-h-screen flex items-center justify-center bg-[#020617] text-slate-100 p-4 font-sans select-none relative overflow-hidden">
+      {/* Ambient background glow elements for realistic glass reflection */}
+      <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[140px] pointer-events-none"></div>
+      <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-emerald-500/5 rounded-full blur-[140px] pointer-events-none"></div>
+
+      <div className="w-full max-w-[370px] bg-slate-950/30 backdrop-blur-2xl rounded-3xl p-6 border border-white/10 shadow-2xl relative overflow-hidden">
+        {/* Subtle internal glows */}
+        <div className="absolute -top-12 -left-12 w-28 h-28 bg-blue-600/20 rounded-full blur-xl pointer-events-none"></div>
+        <div className="absolute -bottom-12 -right-12 w-28 h-28 bg-emerald-600/15 rounded-full blur-xl pointer-events-none"></div>
 
         {/* Head Branding */}
-        <div className="text-center mb-8 relative z-10">
-          <div className="w-16 h-16 bg-gradient-to-tr from-blue-600 to-blue-500 rounded-3xl flex items-center justify-center font-bold text-3xl shadow-lg shadow-blue-500/20 mx-auto mb-4">
+        <div className="text-center mb-6 relative z-10">
+          <div className="w-14 h-14 bg-gradient-to-tr from-blue-600 to-blue-500 rounded-2xl flex items-center justify-center font-extrabold text-2xl shadow-lg shadow-blue-500/35 mx-auto mb-3 border border-white/10">
             CL
           </div>
-          <h2 className="text-2xl font-extrabold tracking-tight">ChatLink</h2>
-          <p className="text-xs text-slate-400 mt-1">Sua plataforma corporativa de mensagens instantâneas</p>
+          <h2 className="text-xl font-black tracking-tight bg-gradient-to-b from-white to-slate-300 bg-clip-text text-transparent">ChatLink</h2>
+          <p className="text-[10px] text-slate-400 mt-0.5 leading-normal">Sua plataforma corporativa de mensagens</p>
         </div>
 
         {error && (
@@ -316,9 +320,9 @@ export default function Auth({ onAuthSuccess }: AuthProps) {
                   placeholder="nome@empresa.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-800 rounded-xl py-2.5 pl-10 pr-4 text-xs focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-slate-100"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-xs focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 text-slate-100 placeholder-slate-500 transition-all"
                 />
-                <Mail className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
+                <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
               </div>
             </div>
 
@@ -328,7 +332,7 @@ export default function Auth({ onAuthSuccess }: AuthProps) {
                 <button
                   type="button"
                   onClick={() => setIsRecovering(true)}
-                  className="text-xs text-blue-400 hover:underline cursor-pointer"
+                  className="text-xs text-blue-400 hover:underline cursor-pointer font-medium"
                 >
                   Esqueceu a senha?
                 </button>
@@ -340,9 +344,9 @@ export default function Auth({ onAuthSuccess }: AuthProps) {
                   placeholder="Sua senha secreta"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-800 rounded-xl py-2.5 pl-10 pr-4 text-xs focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-slate-100"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-xs focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 text-slate-100 placeholder-slate-500 transition-all"
                 />
-                <KeyRound className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
+                <KeyRound className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
               </div>
             </div>
 
@@ -352,7 +356,7 @@ export default function Auth({ onAuthSuccess }: AuthProps) {
                 id="remember"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                className="rounded border-slate-800 bg-slate-900 text-blue-500 focus:ring-blue-500/20"
+                className="rounded border-white/10 bg-white/5 text-blue-500 focus:ring-blue-500/20"
               />
               <label htmlFor="remember" className="text-xs text-slate-400 cursor-pointer select-none">Lembrar meu acesso neste aparelho</label>
             </div>
@@ -360,7 +364,7 @@ export default function Auth({ onAuthSuccess }: AuthProps) {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all active:scale-98 cursor-pointer shadow-lg shadow-blue-600/20"
+              className="w-full py-2.5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white rounded-xl text-xs font-bold transition-all active:scale-98 cursor-pointer shadow-lg shadow-blue-500/20 border border-white/10"
             >
               {loading ? "Entrando..." : "Entrar no ChatLink"}
             </button>
