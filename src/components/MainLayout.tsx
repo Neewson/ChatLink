@@ -63,6 +63,10 @@ export default function MainLayout({ currentUser, onLogout, onUpdateCurrentUser 
   const [contactRequestEmail, setContactRequestEmail] = useState("");
   const [contactRequests, setContactRequests] = useState<ContactRequest[]>([]);
   
+  // Discover users feature
+  const [discoverableUsers, setDiscoverableUsers] = useState<User[]>([]);
+  const [userSearchQuery, setUserSearchQuery] = useState("");
+  
   // Active call
   const [activeCall, setActiveCall] = useState<Call | null>(null);
 
@@ -83,6 +87,60 @@ export default function MainLayout({ currentUser, onLogout, onUpdateCurrentUser 
       setContactRequests(reqs);
     } catch (_) {}
   };
+
+  const fetchDiscoverableUsers = async (q: string = "") => {
+    try {
+      const res = await fetch(`/api/search?query=${encodeURIComponent(q)}`, {
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("chatlink_token")}`
+        }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setDiscoverableUsers(data.users || []);
+      } else {
+        // Local simulation fallback
+        const currentUserId = currentUser.id;
+        const mockUsers = JSON.parse(localStorage.getItem("chatlink_mock_users") || "{}");
+        const list = Object.values(mockUsers).filter((u: any) => u.id !== currentUserId && !u.isBanned);
+        if (list.length > 0) {
+          setDiscoverableUsers(list as any[]);
+        }
+      }
+    } catch (_) {
+      setDiscoverableUsers([]);
+    }
+  };
+
+  const handleStartConversationWithUser = async (user: User) => {
+    try {
+      setErrorMsg("");
+      const payload: CreateChatPayload = {
+        type: "individual",
+        targetUsername: user.username,
+        name: `${user.firstName} ${user.lastName}`,
+        avatarUrl: user.photoUrl
+      };
+      const created = await api.createChat(payload);
+      
+      const allChats = await api.getChats();
+      setChats(allChats);
+      
+      const foundChat = allChats.find(c => c.id === created.id) || created;
+      setActiveChat(foundChat);
+      setShowContactsModal(false);
+      setShowCreateChatModal(false);
+    } catch (err: any) {
+      alert(err.message || "Erro ao iniciar conversa.");
+    }
+  };
+
+  useEffect(() => {
+    if (showContactsModal) {
+      fetchDiscoverableUsers(userSearchQuery);
+    }
+  }, [showContactsModal, userSearchQuery]);
 
   useEffect(() => {
     fetchChats();
@@ -588,6 +646,61 @@ export default function MainLayout({ currentUser, onLogout, onUpdateCurrentUser 
 
                 {contactRequests.length === 0 && (
                   <p className="text-xs text-slate-500 text-center py-4">Nenhuma solicitação pendente.</p>
+                )}
+              </div>
+            </div>
+
+            {/* Discover Users Section */}
+            <div className="space-y-2.5 pt-3 border-t border-slate-800/80">
+              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Descobrir Pessoas no ChatLink</p>
+              
+              {/* Search user list query */}
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Buscar pessoas por nome ou @username..."
+                  value={userSearchQuery}
+                  onChange={(e) => setUserSearchQuery(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl py-2 pl-8 pr-3 text-[11px] focus:outline-none focus:border-blue-500 text-slate-200 placeholder-slate-500"
+                />
+                <Search className="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-2.5" />
+              </div>
+
+              {/* Discoverable Users list */}
+              <div className="divide-y divide-slate-800/60 max-h-48 overflow-y-auto custom-scrollbar pr-1">
+                {discoverableUsers.map((u) => (
+                  <div key={u.id} className="py-2 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="relative">
+                        <img 
+                          src={u.photoUrl} 
+                          alt={u.firstName} 
+                          className="w-8 h-8 rounded-lg object-cover bg-slate-800 border border-slate-800"
+                          referrerPolicy="no-referrer"
+                        />
+                        <span className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border border-slate-900 ${
+                          u.status === "online" ? "bg-emerald-500" :
+                          u.status === "busy" ? "bg-amber-500" : "bg-slate-500"
+                        }`} />
+                      </div>
+                      <div className="text-left">
+                        <p className="text-xs font-bold text-slate-200 leading-tight">{u.firstName} {u.lastName}</p>
+                        <p className="text-[9px] text-slate-500 leading-none">@{u.username}</p>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => handleStartConversationWithUser(u)}
+                      className="bg-blue-600 hover:bg-blue-500 active:scale-95 text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg transition-all cursor-pointer"
+                    >
+                      Conversar
+                    </button>
+                  </div>
+                ))}
+
+                {discoverableUsers.length === 0 && (
+                  <p className="text-[10px] text-slate-500 text-center py-4">Nenhuma conta encontrada.</p>
                 )}
               </div>
             </div>

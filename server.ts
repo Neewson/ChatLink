@@ -37,6 +37,7 @@ let calls: Record<string, Call> = {};
 let reports: ReportedMessage[] = [];
 let auditLogs: AuditLog[] = [];
 let contactRequests: Record<string, ContactRequest> = {};
+let activeSessions: Record<string, { userId: string; device: string; ip: string; lastActive: number }> = {};
 
 // Load DB from file if exists
 if (fs.existsSync(DB_FILE)) {
@@ -50,24 +51,113 @@ if (fs.existsSync(DB_FILE)) {
     reports = data.reports || [];
     auditLogs = data.auditLogs || [];
     contactRequests = data.contactRequests || {};
+    activeSessions = data.activeSessions || {};
     console.log("Database successfully loaded from storage.");
   } catch (err) {
     console.error("Error reading database file, starting fresh:", err);
   }
 }
 
+// Seed users if empty
+if (Object.keys(users).length === 0) {
+  users = {
+    "admin-id": {
+      id: "admin-id",
+      username: "admin_demo",
+      email: "admin@chatlink.com",
+      passwordHash: hashPassword("123456"),
+      firstName: "Administrador",
+      lastName: "Geral",
+      photoUrl: "https://api.dicebear.com/7.x/adventurer/svg?seed=admin",
+      coverUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1200",
+      role: "admin",
+      status: "online",
+      createdAt: Date.now(),
+      lastActive: Date.now(),
+      privacySettings: {
+        whoSeesPhoto: "everyone",
+        whoSeesStatus: "everyone",
+        whoSeesLastActive: "everyone",
+        whoSeesBio: "everyone",
+        whoCanMessage: "everyone",
+        whoCanCall: "everyone",
+        whoCanAddGroup: "everyone",
+        whoFindsByUsername: "everyone"
+      },
+      blockedUsers: [],
+      mutedUsers: [],
+      mutedChats: [],
+      bio: "Gerenciamento de rede e suporte geral."
+    },
+    "suporte-id": {
+      id: "suporte-id",
+      username: "suporte_demo",
+      email: "suporte@chatlink.com",
+      passwordHash: hashPassword("123456"),
+      firstName: "Suporte",
+      lastName: "Oficial",
+      photoUrl: "https://api.dicebear.com/7.x/adventurer/svg?seed=suporte",
+      coverUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1200",
+      role: "user",
+      status: "online",
+      createdAt: Date.now(),
+      lastActive: Date.now(),
+      privacySettings: {
+        whoSeesPhoto: "everyone",
+        whoSeesStatus: "everyone",
+        whoSeesLastActive: "everyone",
+        whoSeesBio: "everyone",
+        whoCanMessage: "everyone",
+        whoCanCall: "everyone",
+        whoCanAddGroup: "everyone",
+        whoFindsByUsername: "everyone"
+      },
+      blockedUsers: [],
+      mutedUsers: [],
+      mutedChats: [],
+      bio: "Dúvidas e suporte do ChatLink."
+    },
+    "carla-id": {
+      id: "carla-id",
+      username: "carla_demo",
+      email: "carla@chatlink.com",
+      passwordHash: hashPassword("123456"),
+      firstName: "Carla",
+      lastName: "Silva",
+      photoUrl: "https://api.dicebear.com/7.x/adventurer/svg?seed=carla",
+      coverUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1200",
+      role: "user",
+      status: "online",
+      createdAt: Date.now(),
+      lastActive: Date.now(),
+      privacySettings: {
+        whoSeesPhoto: "everyone",
+        whoSeesStatus: "everyone",
+        whoSeesLastActive: "everyone",
+        whoSeesBio: "everyone",
+        whoCanMessage: "everyone",
+        whoCanCall: "everyone",
+        whoCanAddGroup: "everyone",
+        whoFindsByUsername: "everyone"
+      },
+      blockedUsers: [],
+      mutedUsers: [],
+      mutedChats: [],
+      bio: "Especialista em design de produto."
+    }
+  } as any;
+  saveDb();
+}
+
 // Save DB helper
 function saveDb() {
   try {
-    const data = { users, chats, messages, communities, calls, reports, auditLogs, contactRequests };
+    const data = { users, chats, messages, communities, calls, reports, auditLogs, contactRequests, activeSessions };
     fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), "utf-8");
   } catch (err) {
     console.error("Error saving database:", err);
   }
 }
-
-// Simple security token store (in-memory)
-const activeSessions: Record<string, { userId: string; device: string; ip: string; lastActive: number }> = {};
 
 // SSE connections (for real-time push events)
 interface SSEConnection {
@@ -258,7 +348,6 @@ async function startServer() {
     };
 
     users[userId] = newUser;
-    saveDb();
 
     // Create session
     const token = generateToken();
@@ -268,6 +357,7 @@ async function startServer() {
       ip: (req.headers["x-forwarded-for"] as string) || req.socket.remoteAddress || "127.0.0.1",
       lastActive: Date.now()
     };
+    saveDb();
 
     addAuditLog(userId, "Registro de Usuário", `Registrado com sucesso como @${cleanUsername}`, req);
 
@@ -460,6 +550,7 @@ async function startServer() {
         delete activeSessions[token];
       }
     });
+    saveDb();
     addAuditLog(currentUserId, "Encerramento de Sessões", "Encerrou todas as outras sessões ativas remotamente", req);
     res.json({ success: true });
   });
@@ -557,14 +648,10 @@ async function startServer() {
     const { currentUserId } = req.body;
     const q = (query as string || "").toLowerCase().trim();
 
-    if (!q) {
-      res.json({ users: [], chats: [] });
-      return;
-    }
-
     // Search active registered users
     const resultsUsers = Object.values(users)
       .filter((u) => u.id !== currentUserId && !u.isBanned && (
+        !q ||
         u.username.toLowerCase().includes(q) ||
         u.firstName.toLowerCase().includes(q) ||
         u.lastName.toLowerCase().includes(q) ||
@@ -577,8 +664,13 @@ async function startServer() {
         lastName: u.lastName,
         photoUrl: u.photoUrl,
         bio: u.bio,
-        status: u.privacySettings.whoSeesStatus === "everyone" ? u.status : UserStatus.INVISIBLE
+        status: u.privacySettings.whoSeesStatus === "everyone" ? u.status : "offline"
       }));
+
+    if (!q) {
+      res.json({ users: resultsUsers, chats: [] });
+      return;
+    }
 
     // Search public channels or active groups
     const resultsChats = Object.values(chats)
@@ -902,6 +994,43 @@ async function startServer() {
     broadcastToChatMembers(chatId, "message", newMsg);
 
     res.json(newMsg);
+
+    // Auto-reply logic for Support / Carla bots on the server
+    if (chat.type === "individual") {
+      const peerId = chat.members.find((m) => m !== currentUserId);
+      if (peerId === "suporte-id" || peerId === "carla-id") {
+        setTimeout(() => {
+          const peerUser = users[peerId];
+          if (peerUser) {
+            const botMsg: Message = {
+              id: crypto.randomUUID(),
+              chatId,
+              senderId: peerUser.id,
+              senderName: `${peerUser.firstName} ${peerUser.lastName}`,
+              senderUsername: peerUser.username,
+              senderPhoto: peerUser.photoUrl,
+              type: "text",
+              content: peerId === "suporte-id"
+                ? `Olá! Sou o assistente de suporte do ChatLink. Recebi sua mensagem: "${content || 'Anexo'}". Como posso ajudar você hoje?`
+                : `Olá! Sou a Carla, especialista de produto. Adorei sua mensagem: "${content || 'Anexo'}". Como posso ajudar você a conhecer o app?`,
+              timestamp: Date.now(),
+              reactions: {},
+              isEdited: false,
+              isDeleted: false
+            };
+            
+            if (!messages[chatId]) messages[chatId] = [];
+            messages[chatId].push(botMsg);
+            
+            chat.lastMessageText = botMsg.content;
+            chat.lastMessageTimestamp = Date.now();
+            saveDb();
+
+            broadcastToChatMembers(chatId, "message", botMsg);
+          }
+        }, 1200);
+      }
+    }
   });
 
   // Edit Message
@@ -1666,8 +1795,12 @@ async function startServer() {
     res.writeHead(200, {
       "Content-Type": "text/event-stream",
       "Cache-Control": "no-cache",
-      "Connection": "keep-alive"
+      "Connection": "keep-alive",
+      "X-Accel-Buffering": "no"
     });
+    if (typeof (res as any).flushHeaders === "function") {
+      (res as any).flushHeaders();
+    }
 
     res.write("retry: 10000\n\n");
 
