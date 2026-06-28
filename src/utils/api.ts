@@ -107,7 +107,7 @@ const SEED_USERS: Record<string, any> = {
     status: "online",
     isBanned: false,
     twoFactorEnabled: false,
-    bio: "Diretor Comercial de TI.",
+    bio: "Entusiasta de tecnologia e viagens.",
     createdAt: new Date().toISOString(),
     privacySettings: DEFAULT_PRIVACY,
     blockedUsers: [],
@@ -118,13 +118,13 @@ const SEED_USERS: Record<string, any> = {
     username: "suporte",
     email: "suporte@chatlink.com",
     firstName: "Suporte",
-    lastName: "Comercial",
+    lastName: "Oficial",
     photoUrl: "https://api.dicebear.com/7.x/adventurer/svg?seed=suporte",
     role: "user",
     status: "online",
     isBanned: false,
     twoFactorEnabled: false,
-    bio: "Dúvidas e integrações ChatLink.",
+    bio: "Dúvidas e suporte do ChatLink.",
     createdAt: new Date().toISOString(),
     privacySettings: DEFAULT_PRIVACY,
     blockedUsers: [],
@@ -303,7 +303,7 @@ export const api = {
           status: "online",
           isBanned: false,
           twoFactorEnabled: false,
-          bio: "Olá, estou usando o ChatLink Comercial!",
+          bio: "Olá, estou usando o ChatLink!",
           createdAt: new Date().toISOString(),
           privacySettings: DEFAULT_PRIVACY,
           blockedUsers: [],
@@ -394,7 +394,7 @@ export const api = {
 
     if (!res.ok) {
       const err = await res.json();
-      throw new Error(err.error || "Erro ao registrar conta comercial.");
+      throw new Error(err.error || "Erro ao registrar conta.");
     }
 
     return await res.json();
@@ -495,7 +495,7 @@ export const api = {
         const cleanTarget = payload.targetUsername.replace(/[@\s]/g, "").trim().toLowerCase();
         targetUser = (Object.values(mockUsers) as any[]).find((u: any) => u.username.toLowerCase() === cleanTarget);
         if (!targetUser) {
-          throw new Error("Nenhum usuário comercial encontrado com este @username.");
+          throw new Error("Nenhum usuário encontrado com este @username.");
         }
       }
 
@@ -537,7 +537,7 @@ export const api = {
         if (found) {
           peerUserId = found.id;
         } else {
-          throw new Error("Nenhum usuário comercial encontrado com este @username.");
+          throw new Error("Nenhum usuário encontrado com este @username.");
         }
       } else {
         throw new Error("Falha ao pesquisar usuário.");
@@ -1059,7 +1059,7 @@ export const api = {
       const target = (Object.values(mockUsers) as any[]).find((u: any) => u.email.toLowerCase() === email.toLowerCase()) as any;
       
       if (!target) {
-        throw new Error("Nenhum usuário comercial encontrado com este e-mail no ChatLink.");
+        throw new Error("Nenhum usuário encontrado com este e-mail no ChatLink.");
       }
       if (target.id === currentUserId) {
         throw new Error("Você não pode enviar uma solicitação de contato para si mesmo.");
@@ -1111,7 +1111,7 @@ export const api = {
               senderUsername: target.username,
               senderPhoto: target.photoUrl,
               type: "text",
-              content: `Olá! Fico feliz em nos conectarmos comercialmente aqui no ChatLink. Vamos conversar!`,
+              content: `Olá! Fico feliz em nos conectarmos aqui no ChatLink. Vamos conversar!`,
               timestamp: Date.now(),
               reactions: {},
               isEdited: false,
@@ -1268,7 +1268,7 @@ export const api = {
 
     if (!res.ok) {
       const err = await res.json();
-      throw new Error(err.error || "Erro ao iniciar ligação comercial.");
+      throw new Error(err.error || "Erro ao iniciar ligação.");
     }
 
     return await res.json();

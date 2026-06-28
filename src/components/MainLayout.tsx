@@ -139,7 +139,7 @@ export default function MainLayout({ currentUser, onLogout, onUpdateCurrentUser 
 
     try {
       await api.sendContactRequest(contactRequestEmail);
-      alert("Convite de contato comercial enviado com sucesso!");
+      alert("Convite de contato enviado com sucesso!");
       setContactRequestEmail("");
       fetchContactRequests();
     } catch (err: any) {
@@ -507,14 +507,14 @@ export default function MainLayout({ currentUser, onLogout, onUpdateCurrentUser 
               </button>
             </div>
 
-            {/* Form to request contact via commercial email */}
+            {/* Form to request contact via email */}
             <form onSubmit={handleAddContactRequestSubmit} className="space-y-2">
-              <label className="block text-[10px] text-slate-500 font-bold uppercase">Adicionar Contato por E-mail Comercial</label>
+              <label className="block text-[10px] text-slate-500 font-bold uppercase">Adicionar Contato por E-mail</label>
               <div className="flex gap-2">
                 <input
                   type="email"
                   required
-                  placeholder="ex: nilson@empresa.com"
+                  placeholder="ex: seuamigo@exemplo.com"
                   value={contactRequestEmail}
                   onChange={(e) => setContactRequestEmail(e.target.value)}
                   className="flex-1 bg-slate-950 border border-slate-800 rounded-xl py-2 px-3 text-xs focus:outline-none"

@@ -317,7 +317,7 @@ export default function Auth({ onAuthSuccess }: AuthProps) {
                 <input
                   type="email"
                   required
-                  placeholder="nome@empresa.com"
+                  placeholder="seuemail@exemplo.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-xs focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 text-slate-100 placeholder-slate-500 transition-all"
@@ -468,12 +468,12 @@ export default function Auth({ onAuthSuccess }: AuthProps) {
             </div>
 
             <div>
-              <label className="block text-[10px] font-semibold text-slate-400 mb-1">E-mail Comercial *</label>
+              <label className="block text-[10px] font-semibold text-slate-400 mb-1">E-mail *</label>
               <div className="relative">
                 <input
                   type="email"
                   required
-                  placeholder="nome@empresa.com"
+                  placeholder="seuemail@exemplo.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full bg-slate-900 border border-slate-800 rounded-xl py-2 pl-9 pr-3 text-xs focus:outline-none focus:border-blue-500 text-slate-100"

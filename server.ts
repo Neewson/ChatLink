@@ -1313,7 +1313,7 @@ async function startServer() {
     );
 
     if (!target) {
-      res.status(404).json({ error: "Nenhum usuário comercial encontrado com este e-mail no ChatLink." });
+      res.status(404).json({ error: "Nenhum usuário encontrado com este e-mail no ChatLink." });
       return;
     }
 
@@ -1396,7 +1396,7 @@ async function startServer() {
           avatarUrl: senderUser.photoUrl,
           members: [request.senderId, currentUserId],
           admins: [request.senderId, currentUserId],
-          lastMessageText: "Solicitação de contato comercial aceita.",
+          lastMessageText: "Solicitação de contato aceita.",
           lastMessageTimestamp: Date.now()
         };
 

@@ -233,7 +233,7 @@ export default function SettingsModal({ currentUser, onClose, onUpdateUser }: Se
                 activeTab === "profile" ? "bg-blue-600 text-white font-bold" : "text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"
               }`}
             >
-              <UserIcon className="w-4 h-4" /> Perfil Comercial
+              <UserIcon className="w-4 h-4" /> Perfil de Usuário
             </button>
             <button
               onClick={() => setActiveTab("privacy")}

@@ -1133,12 +1133,12 @@ export default function ChatArea({ chat, currentUser, onRefreshChats, onStartCal
       {showPollModal && (
         <div className="fixed inset-0 bg-slate-950/85 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="w-full max-w-sm bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-4">
-            <h3 className="text-sm font-bold flex items-center gap-1.5"><BarChart2 className="w-5 h-5 text-blue-500" /> Nova Enquete Comercial</h3>
+            <h3 className="text-sm font-bold flex items-center gap-1.5"><BarChart2 className="w-5 h-5 text-blue-500" /> Nova Enquete</h3>
             <div>
               <label className="block text-[10px] text-slate-500 font-bold mb-1">Pergunta da enquete</label>
               <input
                 type="text"
-                placeholder="Ex: Qual o melhor dia para a sprint review?"
+                placeholder="Ex: Qual o plano para o final de semana?"
                 value={pollQuestion}
                 onChange={(e) => setPollQuestion(e.target.value)}
                 className="w-full bg-slate-950 border border-slate-800 rounded-xl py-2 px-3 text-xs focus:outline-none"
@@ -1228,7 +1228,7 @@ export default function ChatArea({ chat, currentUser, onRefreshChats, onStartCal
       {showContactModal && (
         <div className="fixed inset-0 bg-slate-950/85 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="w-full max-w-sm bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-4">
-            <h3 className="text-sm font-bold flex items-center gap-1.5"><UserIcon className="w-5 h-5 text-teal-500" /> Compartilhar Contato Comercial</h3>
+            <h3 className="text-sm font-bold flex items-center gap-1.5"><UserIcon className="w-5 h-5 text-teal-500" /> Compartilhar Contato</h3>
             <div>
               <label className="block text-[10px] text-slate-500 font-bold mb-1">Nome Completo</label>
               <input
