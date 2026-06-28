@@ -1019,6 +1019,28 @@ export const api = {
     return await res.json();
   },
 
+  // Delete current user account
+  async deleteAccount(): Promise<void> {
+    if (useLocalSimulation) {
+      const currentUserId = getLoggedInUserId();
+      const mockUsers = getMockData("users", SEED_USERS) as any;
+      delete mockUsers[currentUserId];
+      saveMockData("users", mockUsers);
+      clearSession();
+      return;
+    }
+
+    const res = await fetch("/api/users/delete", {
+      method: "POST",
+      headers: getHeaders()
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || "Erro ao excluir conta.");
+    }
+  },
+
   // Get Contact Requests for current logged-in user
   async getContactRequests(): Promise<ContactRequest[]> {
     if (useLocalSimulation) {

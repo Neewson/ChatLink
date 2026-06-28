@@ -597,6 +597,26 @@ async function startServer() {
     res.json(user);
   });
 
+  // Delete User Account
+  app.post("/api/users/delete", authenticateUser, (req, res) => {
+    const { currentUserId } = req.body;
+    
+    // 1. Remove user from the database
+    delete users[currentUserId];
+    
+    // 2. Remove all sessions for this user
+    Object.keys(activeSessions).forEach((token) => {
+      if (activeSessions[token].userId === currentUserId) {
+        delete activeSessions[token];
+      }
+    });
+
+    // 3. Save database
+    saveDb();
+    
+    res.json({ success: true, message: "Conta excluída permanentemente com sucesso." });
+  });
+
   // Block User Action
   app.post("/api/users/block", authenticateUser, (req, res) => {
     const { currentUserId, targetUserId } = req.body;

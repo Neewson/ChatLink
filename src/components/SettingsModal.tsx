@@ -204,6 +204,30 @@ export default function SettingsModal({ currentUser, onClose, onUpdateUser }: Se
     window.location.reload();
   };
 
+  const handleDeleteAccount = async () => {
+    const confirmText = "Aviso Crítico: Tem certeza de que deseja EXCLUIR PERMANENTEMENTE sua conta do ChatLink? Esta ação não pode ser desfeita.";
+    if (!confirm(confirmText)) return;
+    
+    const confirmationUsername = prompt(`Para confirmar a exclusão, digite seu nome de usuário do ChatLink (sem @):\nUsername esperado: ${currentUser.username}`);
+    if (!confirmationUsername || confirmationUsername.trim().toLowerCase() !== currentUser.username.toLowerCase()) {
+      alert("Nome de usuário incorreto. A exclusão de conta foi cancelada.");
+      return;
+    }
+
+    setLoading(true);
+    setErrorMsg("");
+    setSuccessMsg("");
+    try {
+      await api.deleteAccount();
+      alert("Sua conta foi excluída com sucesso. Todos os seus dados pessoais e sessões ativas foram removidos.");
+      clearSession();
+      window.location.reload();
+    } catch (err: any) {
+      setErrorMsg(err.message || "Erro ao excluir conta.");
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center z-50 p-4 font-sans text-slate-100 select-none">
       <div className="w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl flex flex-col h-[90vh] md:h-[560px]">
@@ -615,6 +639,25 @@ export default function SettingsModal({ currentUser, onClose, onUpdateUser }: Se
                   </div>
 
                 </div>
+
+                <div className="p-4 bg-red-950/15 border border-red-500/20 rounded-xl space-y-3 mt-4">
+                  <div>
+                    <h4 className="text-xs font-bold text-red-500 flex items-center gap-1.5">
+                      <Trash2 className="w-4 h-4" /> Excluir Conta Permanentemente
+                    </h4>
+                    <p className="text-[10px] text-slate-400 mt-1 leading-normal">
+                      Esta ação é definitiva e irreversível. Todos os seus dados cadastrais, sessões ativas e histórico de configurações serão removidos permanentemente de nossos servidores.
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleDeleteAccount}
+                    disabled={loading}
+                    className="w-full bg-red-600/90 hover:bg-red-500 disabled:bg-red-800 text-white font-bold text-xs py-2 px-3 rounded-xl transition-all active:scale-[0.98] cursor-pointer"
+                  >
+                    {loading ? "Excluindo Conta..." : "Confirmar Exclusão de Conta Permanente"}
+                  </button>
+                </div>
+
               </div>
             )}
 
