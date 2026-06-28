@@ -206,7 +206,7 @@ export default function SettingsModal({ currentUser, onClose, onUpdateUser }: Se
 
   return (
     <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center z-50 p-4 font-sans text-slate-100 select-none">
-      <div className="w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl flex flex-col h-[560px]">
+      <div className="w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl flex flex-col h-[90vh] md:h-[560px]">
         
         {/* Modal Header */}
         <div className="p-4 bg-slate-950/60 border-b border-slate-800 flex justify-between items-center">
@@ -223,13 +223,13 @@ export default function SettingsModal({ currentUser, onClose, onUpdateUser }: Se
         </div>
 
         {/* Modal Body: Left menu tab vs Right settings area */}
-        <div className="flex-1 flex overflow-hidden">
+        <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
           
           {/* Navigation left pane */}
-          <div className="w-48 bg-slate-950/40 border-r border-slate-800 p-3 space-y-1 overflow-y-auto custom-scrollbar">
+          <div className="w-full md:w-48 bg-slate-950/40 border-b md:border-b-0 md:border-r border-slate-800 p-3 flex flex-row md:flex-col gap-1 overflow-x-auto md:overflow-y-auto custom-scrollbar shrink-0 select-none whitespace-nowrap">
             <button
               onClick={() => setActiveTab("profile")}
-              className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded-xl text-left transition-all ${
+              className={`flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded-xl text-left transition-all shrink-0 whitespace-nowrap md:w-full ${
                 activeTab === "profile" ? "bg-blue-600 text-white font-bold" : "text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"
               }`}
             >
@@ -237,7 +237,7 @@ export default function SettingsModal({ currentUser, onClose, onUpdateUser }: Se
             </button>
             <button
               onClick={() => setActiveTab("privacy")}
-              className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded-xl text-left transition-all ${
+              className={`flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded-xl text-left transition-all shrink-0 whitespace-nowrap md:w-full ${
                 activeTab === "privacy" ? "bg-blue-600 text-white font-bold" : "text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"
               }`}
             >
@@ -245,7 +245,7 @@ export default function SettingsModal({ currentUser, onClose, onUpdateUser }: Se
             </button>
             <button
               onClick={() => setActiveTab("sessions")}
-              className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded-xl text-left transition-all ${
+              className={`flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded-xl text-left transition-all shrink-0 whitespace-nowrap md:w-full ${
                 activeTab === "sessions" ? "bg-blue-600 text-white font-bold" : "text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"
               }`}
             >
@@ -253,7 +253,7 @@ export default function SettingsModal({ currentUser, onClose, onUpdateUser }: Se
             </button>
             <button
               onClick={() => setActiveTab("backup")}
-              className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded-xl text-left transition-all ${
+              className={`flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded-xl text-left transition-all shrink-0 whitespace-nowrap md:w-full ${
                 activeTab === "backup" ? "bg-blue-600 text-white font-bold" : "text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"
               }`}
             >
@@ -261,7 +261,7 @@ export default function SettingsModal({ currentUser, onClose, onUpdateUser }: Se
             </button>
             <button
               onClick={() => setActiveTab("storage")}
-              className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded-xl text-left transition-all ${
+              className={`flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded-xl text-left transition-all shrink-0 whitespace-nowrap md:w-full ${
                 activeTab === "storage" ? "bg-blue-600 text-white font-bold" : "text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"
               }`}
             >

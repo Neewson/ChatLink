@@ -28,7 +28,8 @@ import {
   Pause, 
   Brush, 
   FileLock,
-  Volume2
+  Volume2,
+  ArrowLeft
 } from "lucide-react";
 
 interface ChatAreaProps {
@@ -36,9 +37,10 @@ interface ChatAreaProps {
   currentUser: User;
   onRefreshChats: () => void;
   onStartCall: (type: 'voice' | 'video') => void;
+  onBack?: () => void;
 }
 
-export default function ChatArea({ chat, currentUser, onRefreshChats, onStartCall }: ChatAreaProps) {
+export default function ChatArea({ chat, currentUser, onRefreshChats, onStartCall, onBack }: ChatAreaProps) {
   const [messagesList, setMessagesList] = useState<Message[]>([]);
   const [messageText, setMessageText] = useState("");
   const [loading, setLoading] = useState(false);
@@ -486,6 +488,15 @@ export default function ChatArea({ chat, currentUser, onRefreshChats, onStartCal
       {/* Messages Header */}
       <header className="h-16 border-b border-slate-800 flex items-center justify-between px-6 bg-slate-950/80 backdrop-blur-md sticky top-0 z-20">
         <div className="flex items-center gap-3">
+          {onBack && (
+            <button
+              onClick={onBack}
+              className="p-1.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition-all md:hidden -ml-2"
+              title="Voltar para conversas"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </button>
+          )}
           <div className="relative">
             <img src={chat.avatarUrl} alt="Chat Avatar" className="w-9 h-9 rounded-xl object-cover bg-slate-850" />
             {chat.type === "individual" && (

@@ -215,7 +215,7 @@ export default function MainLayout({ currentUser, onLogout, onUpdateCurrentUser 
     <div className="flex h-screen w-screen bg-[#020617] text-slate-100 overflow-hidden font-sans">
       
       {/* 1. STRUCTURAL SLIDER BAR PANE (Narrow Navigation bar with small elegant icons) */}
-      <aside className="w-16 bg-slate-950 border-r border-slate-800/80 flex flex-col justify-between items-center py-4 select-none">
+      <aside className={`w-16 bg-slate-950 border-r border-slate-800/80 flex flex-col justify-between items-center py-4 select-none ${activeChat ? "hidden md:flex" : "flex"}`}>
         
         {/* Core Brand Badge */}
         <div className="w-11 h-11 bg-gradient-to-tr from-blue-600 to-blue-500 rounded-2xl flex items-center justify-center font-black text-xl shadow-lg shadow-blue-500/20">
@@ -338,7 +338,7 @@ export default function MainLayout({ currentUser, onLogout, onUpdateCurrentUser 
 
       {/* 2. CHATS DIRECTORY MIDDLE SIDEBAR */}
       {activeNavTab !== "admin" && (
-        <section className="w-80 bg-slate-950/60 border-r border-slate-800/80 flex flex-col select-none">
+        <section className={`w-full md:w-80 bg-slate-950/60 border-r border-slate-800/80 flex flex-col select-none ${activeChat ? "hidden md:flex" : "flex"}`}>
           
           {/* Header Search & Create */}
           <div className="p-4 space-y-3 border-b border-slate-800/80">
@@ -458,10 +458,11 @@ export default function MainLayout({ currentUser, onLogout, onUpdateCurrentUser 
           currentUser={currentUser} 
           onRefreshChats={fetchChats}
           onStartCall={handleStartCall}
+          onBack={() => setActiveChat(null)}
         />
       ) : (
         /* Empty default state dashboard */
-        <div className="flex-1 flex flex-col items-center justify-center p-8 text-center select-none bg-[#020617] relative">
+        <div className={`flex-1 flex flex-col items-center justify-center p-8 text-center select-none bg-[#020617] relative ${activeChat ? "flex" : "hidden md:flex"}`}>
           <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-600/5 rounded-full blur-3xl pointer-events-none"></div>
           <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-emerald-600/5 rounded-full blur-3xl pointer-events-none"></div>
 
