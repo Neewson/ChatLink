@@ -601,6 +601,11 @@ async function startServer() {
   app.post("/api/users/delete", authenticateUser, (req, res) => {
     const { currentUserId } = req.body;
     
+    if (!users[currentUserId]) {
+      res.status(404).json({ error: "Usuário não encontrado." });
+      return;
+    }
+
     // 1. Remove user from the database
     delete users[currentUserId];
     
@@ -611,7 +616,36 @@ async function startServer() {
       }
     });
 
-    // 3. Save database
+    // 3. Clean up contact requests involving this user
+    Object.keys(contactRequests).forEach((id) => {
+      const r = contactRequests[id];
+      if (r.senderId === currentUserId || r.receiverId === currentUserId) {
+        delete contactRequests[id];
+      }
+    });
+
+    // 4. Clean up chats involving this user
+    Object.keys(chats).forEach((chatId) => {
+      const chat = chats[chatId];
+      if (chat.type === "individual") {
+        if (chat.members.includes(currentUserId)) {
+          delete chats[chatId];
+          delete messages[chatId]; // also delete messages for this direct chat
+        }
+      } else {
+        // Group or channel: remove member
+        chat.members = chat.members.filter(m => m !== currentUserId);
+        chat.admins = chat.admins.filter(a => a !== currentUserId);
+        
+        // If no members left, delete group chat completely
+        if (chat.members.length === 0) {
+          delete chats[chatId];
+          delete messages[chatId];
+        }
+      }
+    });
+
+    // 5. Save database
     saveDb();
     
     res.json({ success: true, message: "Conta excluída permanentemente com sucesso." });

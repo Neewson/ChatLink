@@ -1023,9 +1023,44 @@ export const api = {
   async deleteAccount(): Promise<void> {
     if (useLocalSimulation) {
       const currentUserId = getLoggedInUserId();
+      
+      // 1. Delete user
       const mockUsers = getMockData("users", SEED_USERS) as any;
       delete mockUsers[currentUserId];
       saveMockData("users", mockUsers);
+      
+      // 2. Delete contact requests
+      const mockRequests = getMockData("contactRequests", {}) as any;
+      Object.keys(mockRequests).forEach((id) => {
+        const r = mockRequests[id];
+        if (r.senderId === currentUserId || r.receiverId === currentUserId) {
+          delete mockRequests[id];
+        }
+      });
+      saveMockData("contactRequests", mockRequests);
+
+      // 3. Delete chats & messages
+      const mockChats = getMockData("chats", {}) as any;
+      const mockMessages = getMockData("messages", {}) as any;
+      Object.keys(mockChats).forEach((chatId) => {
+        const chat = mockChats[chatId];
+        if (chat.type === "individual") {
+          if (chat.members.includes(currentUserId)) {
+            delete mockChats[chatId];
+            delete mockMessages[chatId];
+          }
+        } else {
+          chat.members = chat.members.filter((m: string) => m !== currentUserId);
+          chat.admins = chat.admins.filter((a: string) => a !== currentUserId);
+          if (chat.members.length === 0) {
+            delete mockChats[chatId];
+            delete mockMessages[chatId];
+          }
+        }
+      });
+      saveMockData("chats", mockChats);
+      saveMockData("messages", mockMessages);
+
       clearSession();
       return;
     }
