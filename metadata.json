@@ -1,0 +1,6 @@
+{
+  "name": "ChatLink",
+  "description": "Uma plataforma moderna e segura de mensagens instantâneas baseada em e-mail e @username, com chat, grupos, canais, comunidades, chamadas e painel de administração.",
+  "requestFramePermissions": ["camera", "microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
