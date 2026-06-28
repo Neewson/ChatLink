@@ -27,8 +27,17 @@ export default function App() {
           if (res.ok) {
             const user = await res.json();
             setCurrentUser(user);
+          } else if (res.status === 404) {
+            // Server not found / static hosting (Vercel). Transition to local simulation!
+            console.log("ChatLink server not found (404). Activating Client-Side Persistent Fallback...");
+            try {
+              setCurrentUser(JSON.parse(userStr));
+            } catch (e) {
+              localStorage.removeItem("chatlink_token");
+              localStorage.removeItem("chatlink_user");
+            }
           } else {
-            // Invalid token
+            // Invalid token (401, 403, etc.)
             localStorage.removeItem("chatlink_token");
             localStorage.removeItem("chatlink_user");
           }

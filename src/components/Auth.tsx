@@ -67,7 +67,7 @@ export default function Auth({ onAuthSuccess }: AuthProps) {
       } catch (_) {
         setUsernameStatus("idle");
       }
-    }, 4000000000); // Trigger check, we also have manual search or triggers
+    }, 600); // Debounce check dynamically
 
     return () => clearTimeout(timer);
   }, [username, isLogin]);
