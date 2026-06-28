@@ -206,7 +206,7 @@ export function initEventSource() {
   };
 
   eventSource.onerror = async (err) => {
-    console.error("ChatLink SSE connection error. Checking session status...", err);
+    console.warn("ChatLink SSE connection check/reconnecting...", err);
     const token = localStorage.getItem("chatlink_token");
     if (token) {
       try {

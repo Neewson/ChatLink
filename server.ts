@@ -1832,7 +1832,11 @@ async function startServer() {
 
     // Ping interval to keep connection alive
     const interval = setInterval(() => {
-      res.write(": keepalive\n\n");
+      try {
+        res.write(": keepalive\n\n");
+      } catch (err) {
+        clearInterval(interval);
+      }
     }, 20000);
 
     req.on("close", () => {
