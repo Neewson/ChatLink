@@ -23,7 +23,13 @@ export default function CallModal({ call, currentUser, onClose }: CallModalProps
 
   useEffect(() => {
     setStatus(call.status);
-  }, [call.status]);
+    if (call.status === "ended" || call.status === "declined" || call.status === "missed") {
+      const closeTimer = setTimeout(() => {
+        onClose();
+      }, 2000);
+      return () => clearTimeout(closeTimer);
+    }
+  }, [call.status, onClose]);
 
   // Handle timer
   useEffect(() => {

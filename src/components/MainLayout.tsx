@@ -93,12 +93,37 @@ export default function MainLayout({ currentUser, onLogout, onUpdateCurrentUser 
       try {
         const currentCall = await api.getIncomingCall();
         if (currentCall) {
-          setActiveCall(currentCall);
+          setActiveCall((prev) => {
+            if (!prev && (currentCall.status === "ended" || currentCall.status === "declined" || currentCall.status === "missed")) {
+              return null;
+            }
+            return currentCall;
+          });
         }
       } catch (_) {}
     }, 3000);
 
-    return () => clearInterval(callTimer);
+    // Setup real-time call updates listener
+    const handleSyncCallEvent = (e: any) => {
+      const { type, data } = e.detail || {};
+      if (type === "incoming-call") {
+        setActiveCall(data);
+      } else if (type === "call-updated") {
+        setActiveCall((prev) => {
+          if (prev && prev.id === data.id) {
+            return data;
+          }
+          return prev;
+        });
+      }
+    };
+
+    window.addEventListener("chatlink-sync-event", handleSyncCallEvent);
+
+    return () => {
+      clearInterval(callTimer);
+      window.removeEventListener("chatlink-sync-event", handleSyncCallEvent);
+    };
   }, []);
 
   const handleCreateChatSubmit = async (e: React.FormEvent) => {

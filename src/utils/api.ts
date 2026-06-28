@@ -244,7 +244,7 @@ export function initEventSource() {
 
         if (evtName === "incoming-call") {
           lastIncomingCall = data;
-        } else if (evtName === "call-updated" && lastIncomingCall && lastIncomingCall.id === data.id) {
+        } else if (evtName === "call-updated") {
           lastIncomingCall = data;
         }
 

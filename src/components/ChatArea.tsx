@@ -40,6 +40,143 @@ interface ChatAreaProps {
   onBack?: () => void;
 }
 
+function AudioPlayer({ src, initialDuration }: { src: string; initialDuration?: number }) {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(initialDuration || 0);
+  const [playbackRate, setPlaybackRate] = useState(1);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    const audio = new Audio(src);
+    audioRef.current = audio;
+
+    const handlePlay = () => setIsPlaying(true);
+    const handlePause = () => setIsPlaying(false);
+    const handleTimeUpdate = () => {
+      setCurrentTime(audio.currentTime);
+    };
+    const handleLoadedMetadata = () => {
+      if (audio.duration && !isNaN(audio.duration)) {
+        setDuration(Math.round(audio.duration));
+      }
+    };
+    const handleEnded = () => {
+      setIsPlaying(false);
+      setCurrentTime(0);
+    };
+
+    audio.addEventListener("play", handlePlay);
+    audio.addEventListener("pause", handlePause);
+    audio.addEventListener("timeupdate", handleTimeUpdate);
+    audio.addEventListener("loadedmetadata", handleLoadedMetadata);
+    audio.addEventListener("ended", handleEnded);
+
+    if (audio.duration && !isNaN(audio.duration)) {
+      setDuration(Math.round(audio.duration));
+    }
+
+    return () => {
+      audio.pause();
+      audio.removeEventListener("play", handlePlay);
+      audio.removeEventListener("pause", handlePause);
+      audio.removeEventListener("timeupdate", handleTimeUpdate);
+      audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
+      audio.removeEventListener("ended", handleEnded);
+      audioRef.current = null;
+    };
+  }, [src]);
+
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.playbackRate = playbackRate;
+    }
+  }, [playbackRate]);
+
+  const togglePlayPause = () => {
+    if (!audioRef.current) return;
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.play().catch((err) => console.error("Playback error:", err));
+    }
+  };
+
+  const handleStop = () => {
+    if (!audioRef.current) return;
+    audioRef.current.pause();
+    audioRef.current.currentTime = 0;
+    setCurrentTime(0);
+    setIsPlaying(false);
+  };
+
+  const formatTime = (time: number) => {
+    const mins = Math.floor(time / 60);
+    const secs = Math.floor(time % 60);
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
+
+  const speedOptions = [1, 1.5, 2];
+  const toggleSpeed = () => {
+    setPlaybackRate((prev) => {
+      const idx = speedOptions.indexOf(prev);
+      const nextIdx = (idx + 1) % speedOptions.length;
+      return speedOptions[nextIdx];
+    });
+  };
+
+  return (
+    <div className="mb-2 bg-slate-950/60 p-2.5 rounded-2xl flex flex-col gap-2 max-w-[260px] border border-slate-800/40 select-none">
+      <div className="flex items-center gap-2">
+        <button
+          onClick={togglePlayPause}
+          type="button"
+          className="p-1.5 bg-blue-600 text-white rounded-xl hover:bg-blue-500 transition-all flex items-center justify-center cursor-pointer shadow-md shadow-blue-500/10 active:scale-95"
+          title={isPlaying ? "Pausar áudio" : "Tocar áudio"}
+        >
+          {isPlaying ? (
+            <Pause className="w-3.5 h-3.5 fill-white text-white" />
+          ) : (
+            <Play className="w-3.5 h-3.5 fill-white text-white ml-[1px]" />
+          )}
+        </button>
+
+        <button
+          onClick={handleStop}
+          type="button"
+          className="p-1.5 bg-slate-800 text-slate-300 rounded-xl hover:bg-slate-700 hover:text-white transition-all flex items-center justify-center cursor-pointer active:scale-95"
+          title="Parar áudio"
+        >
+          <Square className="w-3.5 h-3.5 fill-slate-300 text-slate-300" />
+        </button>
+
+        <div className="flex-1 min-w-0">
+          <p className="text-[10px] font-bold text-slate-200">Mensagem de Voz</p>
+          <p className="text-[9px] text-slate-400 font-mono">
+            {formatTime(currentTime)} / {formatTime(duration)}
+          </p>
+        </div>
+
+        <button
+          onClick={toggleSpeed}
+          type="button"
+          className="text-[9px] font-bold bg-slate-800/80 border border-slate-700/60 px-1.5 py-0.5 rounded-lg text-slate-300 hover:text-white transition-all active:scale-95"
+          title="Alterar velocidade"
+        >
+          {playbackRate}x
+        </button>
+      </div>
+
+      <div className="w-full bg-slate-900 rounded-full h-1 relative overflow-hidden">
+        <div
+          className="bg-blue-500 h-full rounded-full transition-all duration-100"
+          style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }}
+        ></div>
+      </div>
+    </div>
+  );
+}
+
 export default function ChatArea({ chat, currentUser, onRefreshChats, onStartCall, onBack }: ChatAreaProps) {
   const [messagesList, setMessagesList] = useState<Message[]>([]);
   const [messageText, setMessageText] = useState("");
@@ -114,23 +251,17 @@ export default function ChatArea({ chat, currentUser, onRefreshChats, onStartCal
 
   // Realtime messages sync listener
   useEffect(() => {
-    const handleIncomingEvent = (event: MessageEvent | any) => {
-      // Direct method called from parent/global API sync listeners
-      if (typeof event === "object" && event.chatId === chat.id) {
-        fetchMessages();
-      }
-    };
-    
-    // We attach sync handler using a global window event trigger or basic listener
-    const unsubscribe = window.addEventListener("chatlink-sync-event", (e: any) => {
+    const handleSyncEvent = (e: any) => {
       const { type, data } = e.detail || {};
       if (data && (data.chatId === chat.id || data.messageId)) {
         fetchMessages();
       }
-    });
+    };
+    
+    window.addEventListener("chatlink-sync-event", handleSyncEvent);
 
     return () => {
-      window.removeEventListener("chatlink-sync-event", handleIncomingEvent);
+      window.removeEventListener("chatlink-sync-event", handleSyncEvent);
     };
   }, [chat.id]);
 
@@ -662,30 +793,7 @@ export default function ChatArea({ chat, currentUser, onRefreshChats, onStartCal
                   )}
 
                   {msg.type === "audio" && msg.mediaUrl && (
-                    <div className="mb-2 bg-slate-950/60 p-2 rounded-xl flex items-center gap-2.5 max-w-[240px]">
-                      <button 
-                        onClick={() => {
-                          const sound = new Audio(msg.mediaUrl);
-                          sound.playbackRate = audioSpeed;
-                          sound.play();
-                        }}
-                        className="p-1.5 bg-blue-500 text-white rounded-lg hover:bg-blue-400"
-                        title="Tocar áudio"
-                      >
-                        <Play className="w-3.5 h-3.5 fill-white" />
-                      </button>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[10px] font-bold">Mensagem de Voz</p>
-                        <p className="text-[9px] text-slate-500">{msg.audioDuration ? `${msg.audioDuration}s` : "Áudio"} • {audioSpeed}x velocidade</p>
-                      </div>
-                      {/* Speed toggle */}
-                      <button
-                        onClick={() => setAudioSpeed(prev => prev === 1 ? 1.5 : prev === 1.5 ? 2 : 1)}
-                        className="text-[9px] font-bold bg-slate-800 border border-slate-700 px-1.5 py-0.5 rounded text-slate-400 hover:text-white"
-                      >
-                        {audioSpeed}x
-                      </button>
-                    </div>
+                    <AudioPlayer src={msg.mediaUrl} initialDuration={msg.audioDuration} />
                   )}
 
                   {msg.type === "poll" && msg.pollOptions && (
@@ -895,23 +1003,24 @@ export default function ChatArea({ chat, currentUser, onRefreshChats, onStartCal
             </div>
           </div>
         ) : audioPreviewUrl ? (
-          <div className="bg-slate-900 rounded-2xl p-3 flex items-center justify-between gap-4 border border-blue-500/20">
-            <div className="flex items-center gap-2">
-              <button 
-                onClick={() => new Audio(audioPreviewUrl).play()}
-                className="p-2 bg-blue-600 text-white rounded-xl"
-                title="Ouvir antes de enviar"
-              >
-                <Play className="w-4 h-4 fill-white" />
-              </button>
-              <div>
-                <p className="text-xs font-bold text-slate-200">Revisão do Áudio</p>
-                <p className="text-[10px] text-slate-500">Ouça antes de enviar para o chat seguro</p>
-              </div>
+          <div className="bg-slate-900 rounded-3xl p-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 border border-blue-500/20">
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-bold text-slate-200 mb-2 px-1">Revisão do Áudio Gravado</p>
+              <AudioPlayer src={audioPreviewUrl} initialDuration={recordDuration} />
             </div>
-            <div className="flex items-center gap-2">
-              <button onClick={() => setAudioPreviewUrl(null)} className="p-2 text-slate-400 hover:text-white">Cancelar</button>
-              <button onClick={sendAudioRecorded} className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-4 py-2 rounded-xl">Enviar Áudio</button>
+            <div className="flex items-center justify-end gap-3 shrink-0">
+              <button 
+                onClick={() => setAudioPreviewUrl(null)} 
+                className="px-3 py-2 text-slate-400 hover:text-white text-xs cursor-pointer hover:bg-slate-800 rounded-xl transition-all"
+              >
+                Cancelar
+              </button>
+              <button 
+                onClick={sendAudioRecorded} 
+                className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all cursor-pointer shadow-md shadow-blue-600/10 active:scale-95"
+              >
+                Enviar Áudio
+              </button>
             </div>
           </div>
         ) : (

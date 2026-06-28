@@ -969,14 +969,19 @@ async function startServer() {
         return;
       }
 
-      targetMsg.isDeletedForEveryone = true;
-      targetMsg.content = "Mensagem apagada";
-      targetMsg.mediaUrl = undefined;
+      // Completely remove from messages list
+      const list = messages[targetChatId] || [];
+      const idx = list.findIndex((m) => m.id === messageId);
+      if (idx !== -1) {
+        list.splice(idx, 1);
+      }
     } else {
-      // Just local delete (we can filter out on client side, or delete locally)
-      // For functional simplicity we mark deleted
-      targetMsg.isDeletedForEveryone = true;
-      targetMsg.content = "Mensagem ocultada";
+      // Delete for me: remove from messages list as well
+      const list = messages[targetChatId] || [];
+      const idx = list.findIndex((m) => m.id === messageId);
+      if (idx !== -1) {
+        list.splice(idx, 1);
+      }
     }
 
     saveDb();
