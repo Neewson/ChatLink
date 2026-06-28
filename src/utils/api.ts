@@ -81,8 +81,9 @@ const DEFAULT_PRIVACY: any = {
 const SEED_USERS: Record<string, any> = {
   "admin-id": {
     id: "admin-id",
-    username: "admin",
+    username: "admin_demo",
     email: "admin@chatlink.com",
+    password: "123456",
     firstName: "Administrador",
     lastName: "Geral",
     photoUrl: "https://api.dicebear.com/7.x/adventurer/svg?seed=admin",
@@ -98,8 +99,9 @@ const SEED_USERS: Record<string, any> = {
   },
   "nilson-id": {
     id: "nilson-id",
-    username: "nilson",
+    username: "nilson_demo",
     email: "nilson@chatlink.com",
+    password: "123456",
     firstName: "Nilson",
     lastName: "Camargo",
     photoUrl: "https://api.dicebear.com/7.x/adventurer/svg?seed=nilson",
@@ -115,8 +117,9 @@ const SEED_USERS: Record<string, any> = {
   },
   "suporte-id": {
     id: "suporte-id",
-    username: "suporte",
+    username: "suporte_demo",
     email: "suporte@chatlink.com",
+    password: "123456",
     firstName: "Suporte",
     lastName: "Oficial",
     photoUrl: "https://api.dicebear.com/7.x/adventurer/svg?seed=suporte",
@@ -132,8 +135,9 @@ const SEED_USERS: Record<string, any> = {
   },
   "carla-id": {
     id: "carla-id",
-    username: "carla",
+    username: "carla_demo",
     email: "carla@chatlink.com",
+    password: "123456",
     firstName: "Carla",
     lastName: "Silva",
     photoUrl: "https://api.dicebear.com/7.x/adventurer/svg?seed=carla",
@@ -290,6 +294,9 @@ export const api = {
       const mockUsers = getMockData("users", SEED_USERS) as any;
       let user = (Object.values(mockUsers) as any[]).find((u: any) => u.email.toLowerCase() === payload.email.toLowerCase());
       if (!user) {
+        throw new Error("Este e-mail não está cadastrado. Por favor, crie uma conta.");
+      }
+      if (user.password && user.password !== payload.password) {
         throw new Error("E-mail ou senha incorretos.");
       }
       return { token: "token_" + user.id, user, tempToken: "temp_" + user.id };
@@ -348,6 +355,7 @@ export const api = {
         id: "user_" + Math.random().toString(36).substring(2, 11),
         username: payload.username.toLowerCase(),
         email: payload.email,
+        password: payload.password, // Store password for simulation!
         firstName: payload.firstName,
         lastName: payload.lastName,
         photoUrl: payload.photoUrl,

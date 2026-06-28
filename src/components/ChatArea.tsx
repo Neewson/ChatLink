@@ -131,7 +131,7 @@ function AudioPlayer({ src, initialDuration }: { src: string; initialDuration?: 
         <button
           onClick={togglePlayPause}
           type="button"
-          className="p-1.5 bg-blue-600 text-white rounded-xl hover:bg-blue-500 transition-all flex items-center justify-center cursor-pointer shadow-md shadow-blue-500/10 active:scale-95"
+          className="p-1.5 bg-slate-700 text-white rounded-xl hover:bg-slate-600 transition-all flex items-center justify-center cursor-pointer shadow-md shadow-slate-900/20 active:scale-95"
           title={isPlaying ? "Pausar áudio" : "Tocar áudio"}
         >
           {isPlaying ? (
@@ -169,7 +169,7 @@ function AudioPlayer({ src, initialDuration }: { src: string; initialDuration?: 
 
       <div className="w-full bg-slate-900 rounded-full h-1 relative overflow-hidden">
         <div
-          className="bg-blue-500 h-full rounded-full transition-all duration-100"
+          className="bg-slate-400 h-full rounded-full transition-all duration-100"
           style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }}
         ></div>
       </div>
@@ -637,7 +637,7 @@ export default function ChatArea({ chat, currentUser, onRefreshChats, onStartCal
           <div>
             <h2 className="text-xs font-bold leading-tight flex items-center gap-1">
               {chat.name}
-              {chat.username && <span className="text-[10px] text-blue-400 font-mono">@{chat.username}</span>}
+              {chat.username && <span className="text-[10px] text-slate-400 font-mono">@{chat.username}</span>}
             </h2>
             <p className="text-[9px] text-slate-500 font-semibold tracking-wide uppercase">
               {chat.type === "channel" ? "Canal Informativo" : chat.type === "group" ? "Grupo ChatLink" : "Conversa Protegida E2E"}
@@ -651,14 +651,14 @@ export default function ChatArea({ chat, currentUser, onRefreshChats, onStartCal
             <>
               <button
                 onClick={() => onStartCall("voice")}
-                className="p-2 rounded-xl bg-slate-900/60 border border-slate-800 text-slate-400 hover:text-blue-400 hover:border-blue-500/20 transition-all cursor-pointer"
+                className="p-2 rounded-xl bg-slate-900/60 border border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700 transition-all cursor-pointer"
                 title="Chamada de Voz"
               >
                 <Volume2 className="w-4 h-4" />
               </button>
               <button
                 onClick={() => onStartCall("video")}
-                className="p-2 rounded-xl bg-slate-900/60 border border-slate-800 text-slate-400 hover:text-blue-400 hover:border-blue-500/20 transition-all cursor-pointer"
+                className="p-2 rounded-xl bg-slate-900/60 border border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700 transition-all cursor-pointer"
                 title="Chamada de Vídeo"
               >
                 <Camera className="w-4 h-4" />
@@ -748,7 +748,7 @@ export default function ChatArea({ chat, currentUser, onRefreshChats, onStartCal
                 {/* Pinned tag indicator inside bubble */}
                 {msg.pinned && (
                   <div className="flex items-center gap-1 text-[9px] text-slate-400 mb-0.5 ml-1">
-                    <Pin className="w-3 h-3 text-blue-500" /> Fixado por admin
+                    <Pin className="w-3 h-3 text-slate-400" /> Fixado por admin
                   </div>
                 )}
 
@@ -756,8 +756,8 @@ export default function ChatArea({ chat, currentUser, onRefreshChats, onStartCal
                 <div 
                   className={`p-3 text-xs leading-relaxed border transition-all relative ${
                     isMe 
-                      ? "bg-blue-600 border-blue-500 text-white rounded-2xl rounded-tr-none" 
-                      : "bg-slate-900 border-slate-800 text-slate-200 rounded-2xl rounded-tl-none"
+                      ? "bg-slate-800/40 border-slate-700/20 text-slate-200 rounded-2xl rounded-tr-none" 
+                      : "bg-slate-900/30 border-slate-800/30 text-slate-300 rounded-2xl rounded-tl-none"
                   }`}
                 >
                   
@@ -1155,7 +1155,7 @@ export default function ChatArea({ chat, currentUser, onRefreshChats, onStartCal
             {messageText.length === 0 ? (
               <button 
                 onClick={startRecording}
-                className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-blue-500 hover:border-blue-500/40 transition-all cursor-pointer"
+                className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700 transition-all cursor-pointer"
                 title="Gravar áudio"
               >
                 <Mic className="w-4.5 h-4.5" />
@@ -1169,7 +1169,7 @@ export default function ChatArea({ chat, currentUser, onRefreshChats, onStartCal
                     handleSendMessage("text");
                   }
                 }}
-                className="w-9 h-9 bg-blue-600 hover:bg-blue-500 text-white rounded-xl flex items-center justify-center transition-all shadow-lg shadow-blue-600/20 active:scale-95 cursor-pointer"
+                className="w-9 h-9 bg-slate-700 hover:bg-slate-600 text-white rounded-xl flex items-center justify-center transition-all shadow-lg shadow-slate-900/30 active:scale-95 cursor-pointer"
                 title="Enviar mensagem"
               >
                 <Send className="w-4.5 h-4.5" />
@@ -1273,7 +1273,7 @@ export default function ChatArea({ chat, currentUser, onRefreshChats, onStartCal
               <button
                 type="button"
                 onClick={() => setPollOptions([...pollOptions, ""])}
-                className="text-[10px] text-blue-400 hover:underline font-bold"
+                className="text-[10px] text-slate-400 hover:text-white hover:underline font-bold"
               >
                 + Adicionar Opção
               </button>

@@ -430,7 +430,7 @@ export default function Auth({ onAuthSuccess }: AuthProps) {
                   type="button"
                   onClick={triggerUsernameCheck}
                   disabled={username.length < 3}
-                  className="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-3 rounded-xl border border-slate-700 font-bold flex items-center gap-1 active:scale-95 transition-all cursor-pointer"
+                  className="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 rounded-xl border border-blue-500 font-bold flex items-center gap-1 active:scale-95 transition-all cursor-pointer"
                 >
                   <RefreshCw className="w-3.5 h-3.5" />
                   Verificar

@@ -298,7 +298,12 @@ async function startServer() {
     const emailLower = email.toLowerCase();
     const user = Object.values(users).find((u) => u.email.toLowerCase() === emailLower);
 
-    if (!user || user.passwordHash !== hashPassword(password)) {
+    if (!user) {
+      res.status(401).json({ error: "Este e-mail não está cadastrado. Por favor, crie uma conta." });
+      return;
+    }
+
+    if (user.passwordHash !== hashPassword(password)) {
       res.status(401).json({ error: "E-mail ou senha incorretos." });
       return;
     }
