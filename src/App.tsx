@@ -13,18 +13,53 @@ export default function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    try {
-      const token = localStorage.getItem("chatlink_token");
-      const userStr = localStorage.getItem("chatlink_user");
-      if (token && userStr) {
-        setCurrentUser(JSON.parse(userStr));
+    async function validateSessionOnStartup() {
+      try {
+        const token = localStorage.getItem("chatlink_token");
+        const userStr = localStorage.getItem("chatlink_user");
+        if (token && userStr) {
+          // Verify with backend to ensure session is still active (not lost due to server restart)
+          const res = await fetch("/api/auth/me", {
+            headers: {
+              "Authorization": `Bearer ${token}`
+            }
+          });
+          if (res.ok) {
+            const user = await res.json();
+            setCurrentUser(user);
+          } else {
+            // Invalid token
+            localStorage.removeItem("chatlink_token");
+            localStorage.removeItem("chatlink_user");
+          }
+        }
+      } catch (_) {
+        // Fallback to local storage if network is offline or unreachable
+        const userStr = localStorage.getItem("chatlink_user");
+        if (userStr) {
+          try {
+            setCurrentUser(JSON.parse(userStr));
+          } catch (e) {
+            localStorage.removeItem("chatlink_token");
+            localStorage.removeItem("chatlink_user");
+          }
+        }
+      } finally {
+        setLoading(false);
       }
-    } catch (_) {
-      localStorage.removeItem("chatlink_token");
-      localStorage.removeItem("chatlink_user");
-    } finally {
-      setLoading(false);
     }
+
+    validateSessionOnStartup();
+
+    // Global listener for unauthorized sessions (e.g. server restarted during active session)
+    const handleUnauthorized = () => {
+      setCurrentUser(null);
+    };
+
+    window.addEventListener("chatlink-unauthorized", handleUnauthorized);
+    return () => {
+      window.removeEventListener("chatlink-unauthorized", handleUnauthorized);
+    };
   }, []);
 
   if (loading) {

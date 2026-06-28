@@ -12,7 +12,8 @@ import {
   Call, 
   ReportedMessage, 
   AuditLog, 
-  SystemStats 
+  SystemStats,
+  ContactRequest
 } from "./src/types.js";
 
 // Ensure data and uploads directories exist
@@ -35,6 +36,7 @@ let communities: Record<string, Community> = {};
 let calls: Record<string, Call> = {};
 let reports: ReportedMessage[] = [];
 let auditLogs: AuditLog[] = [];
+let contactRequests: Record<string, ContactRequest> = {};
 
 // Load DB from file if exists
 if (fs.existsSync(DB_FILE)) {
@@ -47,6 +49,7 @@ if (fs.existsSync(DB_FILE)) {
     calls = data.calls || {};
     reports = data.reports || [];
     auditLogs = data.auditLogs || [];
+    contactRequests = data.contactRequests || {};
     console.log("Database successfully loaded from storage.");
   } catch (err) {
     console.error("Error reading database file, starting fresh:", err);
@@ -56,7 +59,7 @@ if (fs.existsSync(DB_FILE)) {
 // Save DB helper
 function saveDb() {
   try {
-    const data = { users, chats, messages, communities, calls, reports, auditLogs };
+    const data = { users, chats, messages, communities, calls, reports, auditLogs, contactRequests };
     fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), "utf-8");
   } catch (err) {
     console.error("Error saving database:", err);
@@ -1283,6 +1286,156 @@ async function startServer() {
     saveDb();
 
     res.json(comm);
+  });
+
+  // --- CONTACTS / CONTACT REQUESTS ---
+
+  // Get Contact Requests for current user (pending)
+  app.get("/api/contacts/requests", authenticateUser, (req, res) => {
+    const { currentUserId } = req.body;
+    const list = Object.values(contactRequests).filter(
+      (r) => r.receiverId === currentUserId && r.status === "pending"
+    );
+    res.json(list);
+  });
+
+  // Send a Contact Request
+  app.post("/api/contacts/requests", authenticateUser, (req, res) => {
+    const { currentUserId, email } = req.body;
+    if (!email) {
+      res.status(400).json({ error: "O e-mail do contato é obrigatório." });
+      return;
+    }
+
+    const sender = users[currentUserId];
+    const target = Object.values(users).find(
+      (u) => u.email.toLowerCase() === email.toLowerCase() && !u.isBanned
+    );
+
+    if (!target) {
+      res.status(404).json({ error: "Nenhum usuário comercial encontrado com este e-mail no ChatLink." });
+      return;
+    }
+
+    if (target.id === currentUserId) {
+      res.status(400).json({ error: "Você não pode enviar uma solicitação de contato para si mesmo." });
+      return;
+    }
+
+    // Check if there is already a request or they are already connected
+    const existing = Object.values(contactRequests).find(
+      (r) => (r.senderId === currentUserId && r.receiverId === target.id) ||
+             (r.senderId === target.id && r.receiverId === currentUserId)
+    );
+
+    if (existing) {
+      if (existing.status === "pending") {
+        res.status(400).json({ error: "Já existe uma solicitação pendente entre vocês." });
+        return;
+      } else if (existing.status === "accepted") {
+        res.status(400).json({ error: "Você já está conectado com este contato." });
+        return;
+      }
+    }
+
+    const reqId = crypto.randomUUID();
+    const newRequest: ContactRequest = {
+      id: reqId,
+      senderId: currentUserId,
+      senderName: `${sender.firstName} ${sender.lastName}`,
+      senderUsername: sender.username,
+      receiverId: target.id,
+      status: "pending",
+      createdAt: new Date().toISOString()
+    };
+
+    contactRequests[reqId] = newRequest;
+    saveDb();
+
+    // Notify target in real-time
+    broadcastToUser(target.id, "contact-request", newRequest);
+
+    res.json(newRequest);
+  });
+
+  // Accept Contact Request
+  app.post("/api/contacts/requests/:id/accept", authenticateUser, (req, res) => {
+    const { id } = req.params;
+    const { currentUserId } = req.body;
+
+    const request = contactRequests[id];
+    if (!request) {
+      res.status(404).json({ error: "Solicitação não encontrada." });
+      return;
+    }
+
+    if (request.receiverId !== currentUserId) {
+      res.status(403).json({ error: "Apenas o destinatário pode aceitar a solicitação." });
+      return;
+    }
+
+    request.status = "accepted";
+    saveDb();
+
+    // Establish dynamic direct chat between them
+    const senderUser = users[request.senderId];
+    const receiverUser = users[currentUserId];
+
+    if (senderUser && receiverUser) {
+      // Check if chat already exists
+      const existingChat = Object.values(chats).find(
+        (c) => c.type === "individual" && c.members.includes(request.senderId) && c.members.includes(currentUserId)
+      );
+
+      if (!existingChat) {
+        const chatId = crypto.randomUUID();
+        const newChat: Chat = {
+          id: chatId,
+          type: "individual",
+          name: `${senderUser.firstName} ${senderUser.lastName}`,
+          avatarUrl: senderUser.photoUrl,
+          members: [request.senderId, currentUserId],
+          admins: [request.senderId, currentUserId],
+          lastMessageText: "Solicitação de contato comercial aceita.",
+          lastMessageTimestamp: Date.now()
+        };
+
+        chats[chatId] = newChat;
+        messages[chatId] = [];
+        saveDb();
+
+        broadcastToUser(request.senderId, "chat-created", newChat);
+        broadcastToUser(currentUserId, "chat-created", newChat);
+      }
+    }
+
+    broadcastToUser(request.senderId, "contact-request-accepted", request);
+
+    res.json({ success: true, request });
+  });
+
+  // Decline Contact Request
+  app.post("/api/contacts/requests/:id/decline", authenticateUser, (req, res) => {
+    const { id } = req.params;
+    const { currentUserId } = req.body;
+
+    const request = contactRequests[id];
+    if (!request) {
+      res.status(404).json({ error: "Solicitação não encontrada." });
+      return;
+    }
+
+    if (request.receiverId !== currentUserId) {
+      res.status(403).json({ error: "Apenas o destinatário pode recusar a solicitação." });
+      return;
+    }
+
+    request.status = "declined";
+    saveDb();
+
+    broadcastToUser(request.senderId, "contact-request-declined", request);
+
+    res.json({ success: true, request });
   });
 
   // --- CALLS ENGINE ---
