@@ -399,7 +399,7 @@ export default function ChatArea({ chat, currentUser, onRefreshChats, onStartCal
       // Simulate direct attachment on fallback
       await handleSendMessage("image", {
         mediaUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600",
-        content: "Desenho corporativo enviado"
+        content: "Desenho enviado"
       });
       setShowDrawingModal(false);
     } finally {

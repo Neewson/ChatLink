@@ -90,7 +90,7 @@ const SEED_USERS: Record<string, any> = {
     status: "online",
     isBanned: false,
     twoFactorEnabled: false,
-    bio: "Gerenciamento de rede e suporte corporativo.",
+    bio: "Gerenciamento de rede e suporte geral.",
     createdAt: new Date().toISOString(),
     privacySettings: DEFAULT_PRIVACY,
     blockedUsers: [],
@@ -141,7 +141,7 @@ const SEED_USERS: Record<string, any> = {
     status: "online",
     isBanned: false,
     twoFactorEnabled: false,
-    bio: "Gerente de Contas Corporativas.",
+    bio: "Especialista em design de produto.",
     createdAt: new Date().toISOString(),
     privacySettings: DEFAULT_PRIVACY,
     blockedUsers: [],
@@ -432,7 +432,7 @@ export const api = {
       const mockUsers = getMockData("users", SEED_USERS) as any;
       const exists = (Object.values(mockUsers) as any[]).some((u: any) => u.email.toLowerCase() === email.toLowerCase());
       if (!exists) {
-        throw new Error("E-mail corporativo não cadastrado no ChatLink.");
+        throw new Error("E-mail não cadastrado no ChatLink.");
       }
       return { message: "Instruções de recuperação de senha simuladas enviadas.", simulatedDetails: "Código: 549321" };
     }
@@ -960,7 +960,7 @@ export const api = {
 
     if (!res.ok) {
       const err = await res.json();
-      throw new Error(err.error || "Falha no upload do arquivo corporativo.");
+      throw new Error(err.error || "Falha no upload do arquivo.");
     }
 
     const data = await res.json();

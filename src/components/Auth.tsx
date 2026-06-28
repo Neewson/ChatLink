@@ -202,7 +202,7 @@ export default function Auth({ onAuthSuccess }: AuthProps) {
             CL
           </div>
           <h2 className="text-xl font-black tracking-tight bg-gradient-to-b from-white to-slate-300 bg-clip-text text-transparent">ChatLink</h2>
-          <p className="text-[10px] text-slate-400 mt-0.5 leading-normal">Sua plataforma corporativa de mensagens</p>
+          <p className="text-[10px] text-slate-400 mt-0.5 leading-normal">Sua plataforma moderna de mensagens e chamadas</p>
         </div>
 
         {error && (

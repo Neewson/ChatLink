@@ -242,7 +242,7 @@ export default function MainLayout({ currentUser, onLogout, onUpdateCurrentUser 
             className={`p-3 rounded-2xl transition-all cursor-pointer relative ${
               activeNavTab === "group" ? "bg-blue-600 text-white" : "text-slate-400 hover:bg-slate-900 hover:text-slate-200"
             }`}
-            title="Grupos de Trabalho"
+            title="Grupos de Conversa"
           >
             <Users className="w-5 h-5" />
             {chats.some(c => c.type === "group" && c.unreadCount > 0) && (
@@ -255,7 +255,7 @@ export default function MainLayout({ currentUser, onLogout, onUpdateCurrentUser 
             className={`p-3 rounded-2xl transition-all cursor-pointer relative ${
               activeNavTab === "channel" ? "bg-blue-600 text-white" : "text-slate-400 hover:bg-slate-900 hover:text-slate-200"
             }`}
-            title="Canais Corporativos"
+            title="Canais Públicos"
           >
             <Layers className="w-5 h-5" />
             {chats.some(c => c.type === "channel" && c.unreadCount > 0) && (
@@ -472,7 +472,7 @@ export default function MainLayout({ currentUser, onLogout, onUpdateCurrentUser 
 
           <h2 className="text-lg font-extrabold tracking-tight">Bem-vindo ao ChatLink</h2>
           <p className="text-xs text-slate-400 max-w-sm mt-1 leading-relaxed">
-            Sua central corporativa segura e confiável de comunicação. Desenvolva projetos, compartilhe ideias e faça chamadas completas E2E sem precisar de número telefônico.
+            Sua central segura e confiável de comunicação. Converse com seus amigos, compartilhe ideias e faça chamadas completas E2E sem precisar de número telefônico.
           </p>
 
           <div className="flex gap-3 mt-6">
