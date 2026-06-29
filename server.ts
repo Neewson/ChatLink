@@ -1496,17 +1496,18 @@ async function startServer() {
   app.post("/api/contacts/requests", authenticateUser, (req, res) => {
     const { currentUserId, email } = req.body;
     if (!email) {
-      res.status(400).json({ error: "O e-mail do contato é obrigatório." });
+      res.status(400).json({ error: "O e-mail ou @username do contato é obrigatório." });
       return;
     }
 
     const sender = users[currentUserId];
+    const cleanSearch = email.toLowerCase().replace(/[@\s]/g, "").trim();
     const target = Object.values(users).find(
-      (u) => u.email.toLowerCase() === email.toLowerCase() && !u.isBanned
+      (u) => (u.email.toLowerCase() === email.toLowerCase() || u.username.toLowerCase() === cleanSearch) && !u.isBanned
     );
 
     if (!target) {
-      res.status(404).json({ error: "Nenhum usuário encontrado com este e-mail no ChatLink." });
+      res.status(404).json({ error: "Nenhum usuário encontrado com este e-mail ou @username no ChatLink." });
       return;
     }
 

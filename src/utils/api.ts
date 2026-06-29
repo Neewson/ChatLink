@@ -36,8 +36,7 @@ if (typeof window !== "undefined") {
   if (
     host.includes("vercel.app") || 
     host.includes("github.io") || 
-    host.includes("stackblitz") || 
-    (host.includes("localhost") === false && !host.includes("run.app"))
+    host.includes("stackblitz")
   ) {
     useLocalSimulation = true;
     console.log("ChatLink: Local Simulation Fallback enabled automatically based on static/serverless hostname.");
@@ -1093,7 +1092,7 @@ export const api = {
     return await res.json();
   },
 
-  // Send contact request by email
+  // Send contact request by email or username
   async sendContactRequest(email: string): Promise<void> {
     if (useLocalSimulation) {
       const currentUserId = getLoggedInUserId();
@@ -1101,10 +1100,13 @@ export const api = {
       const mockRequests = getMockData("contactRequests", {}) as any;
       
       const sender = mockUsers[currentUserId] as any;
-      const target = (Object.values(mockUsers) as any[]).find((u: any) => u.email.toLowerCase() === email.toLowerCase()) as any;
+      const cleanSearch = email.toLowerCase().replace(/[@\s]/g, "").trim();
+      const target = (Object.values(mockUsers) as any[]).find(
+        (u: any) => u.email.toLowerCase() === email.toLowerCase() || u.username.toLowerCase() === cleanSearch
+      ) as any;
       
       if (!target) {
-        throw new Error("Nenhum usuário encontrado com este e-mail no ChatLink.");
+        throw new Error("Nenhum usuário encontrado com este e-mail ou @username no ChatLink.");
       }
       if (target.id === currentUserId) {
         throw new Error("Você não pode enviar uma solicitação de contato para si mesmo.");

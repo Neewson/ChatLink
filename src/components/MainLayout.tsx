@@ -590,14 +590,14 @@ export default function MainLayout({ currentUser, onLogout, onUpdateCurrentUser 
               </button>
             </div>
 
-            {/* Form to request contact via email */}
+            {/* Form to request contact via email or username */}
             <form onSubmit={handleAddContactRequestSubmit} className="space-y-2">
-              <label className="block text-[10px] text-slate-500 font-bold uppercase">Adicionar Contato por E-mail</label>
+              <label className="block text-[10px] text-slate-500 font-bold uppercase">Adicionar Contato por E-mail ou @Username</label>
               <div className="flex gap-2">
                 <input
-                  type="email"
+                  type="text"
                   required
-                  placeholder="ex: seuamigo@exemplo.com"
+                  placeholder="ex: amigo@email.com ou @username"
                   value={contactRequestEmail}
                   onChange={(e) => setContactRequestEmail(e.target.value)}
                   className="flex-1 bg-slate-950 border border-slate-800 rounded-xl py-2 px-3 text-xs focus:outline-none"
